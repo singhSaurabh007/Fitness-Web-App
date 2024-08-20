@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Stack, Typography } from '@mui/material';
-import Logo from '../assets/images/Logo-1.png';
 import fb from "../assets/icons/fb.png";
 import ig from "../assets/icons/ig.png";
 

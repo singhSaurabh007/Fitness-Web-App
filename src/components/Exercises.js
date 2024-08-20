@@ -1,55 +1,48 @@
-import React,{ useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Pagination } from '@mui/material';
-import {Box, Stack, Typography} from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { exerciseOptions, fetchData } from '../utils/fetchData';
 import Loader from './Loader';
 import ExerciseCard from './ExerciseCard';
 
-const Exercises = ({exercises,setExercises,bodyPart}) => {
-
-  //console.log(exercises);
+const Exercises = ({ exercises, setExercises, bodyPart }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [exercisesPerPage] = useState(6);
 
+  // useCallback to stabilize setExercises reference if needed
+  const fetchExercisesData = useCallback(async () => {
+    let exercisesData = [];
+
+    if (bodyPart === 'all') {
+      exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises?limit=10&offset=0', exerciseOptions);
+    } else {
+      exercisesData = await fetchData(`https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}?limit=10&offset=0`, exerciseOptions);
+    }
+
+    setExercises(exercisesData);
+  }, [bodyPart, setExercises]);
+
   useEffect(() => {
-    const fetchExercisesData = async () => {
-      let exercisesData = [];
-
-      if (bodyPart === 'all') {
-        exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
-      } else {
-        
-        exercisesData = await fetchData("https://exercisedb.p.rapidapi.com/exercises/bodyPart/"+bodyPart, exerciseOptions);
-        
-      }
-      //console.log(exercisesData);
-
-      setExercises(exercisesData);
-    };
-
     fetchExercisesData();
-  }, [bodyPart]);
+  }, [fetchExercisesData]);
 
   // Pagination
   const indexOfLastExercise = currentPage * exercisesPerPage;
   const indexOfFirstExercise = indexOfLastExercise - exercisesPerPage;
-  const currentExercises = exercises.slice(indexOfFirstExercise,indexOfLastExercise);
-  //console.log(currentExercises);
+  const currentExercises = exercises.slice(indexOfFirstExercise, indexOfLastExercise);
 
   const paginate = (event, value) => {
     setCurrentPage(value);
-
     window.scrollTo({ top: 1800, behavior: 'smooth' });
   };
 
   if (!currentExercises.length) return <Loader />;
 
-
-
-
   return (
     <Box id="exercises" sx={{ mt: { lg: '109px' } }} mt="50px" p="20px">
-      <Typography variant="h4" fontWeight="bold" sx={{ fontSize: { lg: '44px', xs: '30px' } }} mb="46px">Showing Results</Typography>
+      <Typography variant="h4" fontWeight="bold" sx={{ fontSize: { lg: '44px', xs: '30px' } }} mb="46px">
+        Showing Results
+      </Typography>
       <Stack direction="row" sx={{ gap: { lg: '107px', xs: '50px' } }} flexWrap="wrap" justifyContent="center">
         {currentExercises.map((exercise, idx) => (
           <ExerciseCard key={idx} exercise={exercise} />
@@ -69,7 +62,7 @@ const Exercises = ({exercises,setExercises,bodyPart}) => {
         )}
       </Stack>
     </Box>
-  )
-}
+  );
+};
 
-export default Exercises
+export default Exercises;
